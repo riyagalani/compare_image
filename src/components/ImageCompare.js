@@ -1,6 +1,6 @@
 // ImageCompare.jsx
 import React, { useState } from "react";
-import "./ImageCompare.css";
+// import "./ImageCompare.css";
 import {
   FaPlus,
   FaMinus,
