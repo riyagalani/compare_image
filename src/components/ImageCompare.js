@@ -1,73 +1,111 @@
+// ImageCompare.jsx
 import React, { useState } from "react";
-import ReactCompareImage from "react-compare-image";
 import "./ImageCompare.css";
-
-const imagePairs = [
-  {
-    before: "/images/img1.jpg",
-    after: "/images/img2.jpg",
-    label: "Comparison 1",
-  },
-  {
-    before: "/images/img3.jpg",
-    after: "/images/img4.jpg",
-    label: "Comparison 2",
-  },
-  {
-    before: "/images/img5.jpg",
-    after: "/images/img6.jpg",
-    label: "Comparison 3",
-  },
-];
+import {
+  FaPlus,
+  FaMinus,
+  FaSyncAlt,
+  FaArrowsAltH,
+  FaArrowsAltV
+} from "react-icons/fa";
 
 const ImageCompare = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [zoom, setZoom] = useState(1);
+  const [beforeImage, setBeforeImage] = useState(null);
+  const [afterImage, setAfterImage] = useState(null);
 
-  const { before, after, label } = imagePairs[currentIndex];
+  const [beforeZoom, setBeforeZoom] = useState(1);
+  const [afterZoom, setAfterZoom] = useState(1);
 
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % imagePairs.length);
-    setZoom(1);
+  const [beforeFlipped, setBeforeFlipped] = useState(false);
+  const [afterFlipped, setAfterFlipped] = useState(false);
+
+  const [beforeVFlipped, setBeforeVFlipped] = useState(false);
+  const [afterVFlipped, setAfterVFlipped] = useState(false);
+
+  const handleBeforeChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setBeforeImage(URL.createObjectURL(file));
+    }
   };
 
-  const handlePrev = () =>
-    setCurrentIndex((prev) =>
-      prev === 0 ? imagePairs.length - 1 : prev - 1
-    );
-
-  const zoomIn = () => setZoom((prev) => prev + 0.2);
-  const zoomOut = () => setZoom((prev) => Math.max(0.5, prev - 0.2));
+  const handleAfterChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAfterImage(URL.createObjectURL(file));
+    }
+  };
 
   return (
-    <div className="slider-container">
-      <h2>{label}</h2>
+    <div className="container">
+      <h2>Before / After Comparison</h2>
 
-      <div className="compare-wrapper">
-        <ReactCompareImage
-          leftImage={before}
-          rightImage={after}
-          leftImageCss={{
-            transform: `scale(${zoom})`,
-            transition: "transform 0.3s ease",
-          }}
-          rightImageCss={{
-            transform: `scale(${zoom})`,
-            transition: "transform 0.3s ease",
-          }}
-        />
-      </div>
-
-      <div className="controls">
-        <div className="zoom-buttons">
-          <button onClick={zoomOut}>➖ Zoom Out</button>
-          <button onClick={zoomIn}>➕ Zoom In</button>
+      <div className="input-section">
+        <div>
+          <label><strong>Before Image:</strong></label>
+          <input type="file" accept="image/*" onChange={handleBeforeChange} />
         </div>
-        <div className="switch-buttons">
-          <button onClick={handlePrev}>⬅ Previous</button>
-          <button onClick={handleNext}>Next ➡</button>
+        <div>
+          <label><strong>After Image:</strong></label>
+          <input type="file" accept="image/*" onChange={handleAfterChange} />
         </div>
       </div>
+
+      {beforeImage && afterImage ? (
+        <div className="comparison">
+          {/* Before */}
+          <div className="image-box">
+            <h3>Before</h3>
+            <div className="image-wrapper">
+              <img
+                src={beforeImage}
+                alt="Before"
+                style={{
+                  transform: `scale(${beforeZoom}) ${beforeFlipped ? "scaleX(-1)" : ""} ${beforeVFlipped ? "scaleY(-1)" : ""}`,
+                }}
+              />
+            </div>
+            <div className="controls">
+              <button onClick={() => setBeforeZoom(beforeZoom + 0.1)} title="Zoom In"><FaPlus /></button>
+              <button onClick={() => setBeforeZoom(Math.max(0.1, beforeZoom - 0.1))} title="Zoom Out"><FaMinus /></button>
+              <button onClick={() => setBeforeFlipped(!beforeFlipped)} title="Flip Horizontally"><FaArrowsAltH /></button>
+              <button onClick={() => setBeforeVFlipped(!beforeVFlipped)} title="Flip Vertically"><FaArrowsAltV /></button>
+              <button onClick={() => {
+                setBeforeZoom(1);
+                setBeforeFlipped(false);
+                setBeforeVFlipped(false);
+              }} title="Reset"><FaSyncAlt /></button>
+            </div>
+          </div>
+
+          {/* After */}
+          <div className="image-box">
+            <h3>After</h3>
+            <div className="image-wrapper">
+              <img
+                src={afterImage}
+                alt="After"
+                style={{
+                  transform: `scale(${afterZoom}) ${afterFlipped ? "scaleX(-1)" : ""} ${afterVFlipped ? "scaleY(-1)" : ""}`,
+                }}
+              />
+            </div>
+            <div className="controls">
+              <button onClick={() => setAfterZoom(afterZoom + 0.1)} title="Zoom In"><FaPlus /></button>
+              <button onClick={() => setAfterZoom(Math.max(0.1, afterZoom - 0.1))} title="Zoom Out"><FaMinus /></button>
+              <button onClick={() => setAfterFlipped(!afterFlipped)} title="Flip Horizontally"><FaArrowsAltH /></button>
+              <button onClick={() => setAfterVFlipped(!afterVFlipped)} title="Flip Vertically"><FaArrowsAltV /></button>
+              <button onClick={() => {
+                setAfterZoom(1);
+                setAfterFlipped(false);
+                setAfterVFlipped(false);
+              }} title="Reset"><FaSyncAlt /></button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <p>Please upload both "Before" and "After" images to compare.</p>
+      )}
     </div>
   );
 };
