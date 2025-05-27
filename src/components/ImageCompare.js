@@ -1,17 +1,10 @@
-// ImageCompare.jsx
 import React, { useState } from "react";
-// import "./ImageCompare.css";
-import {
-  FaPlus,
-  FaMinus,
-  FaSyncAlt,
-  FaArrowsAltH,
-  FaArrowsAltV
-} from "react-icons/fa";
+import {FaPlus,FaMinus,FaSyncAlt,FaArrowsAltH,FaArrowsAltV,FaArrowLeft,FaArrowRight,} from "react-icons/fa";
 
 const ImageCompare = () => {
-  const [beforeImage, setBeforeImage] = useState(null);
-  const [afterImage, setAfterImage] = useState(null);
+  const [images, setImages] = useState([]);
+  const [beforeIndex, setBeforeIndex] = useState(0);
+  const [afterIndex, setAfterIndex] = useState(1);
 
   const [beforeZoom, setBeforeZoom] = useState(1);
   const [afterZoom, setAfterZoom] = useState(1);
@@ -22,17 +15,30 @@ const ImageCompare = () => {
   const [beforeVFlipped, setBeforeVFlipped] = useState(false);
   const [afterVFlipped, setAfterVFlipped] = useState(false);
 
-  const handleBeforeChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setBeforeImage(URL.createObjectURL(file));
-    }
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    const urls = files.map((file) => URL.createObjectURL(file));
+    setImages(urls.slice(-10)); // Limit to last 10 images
+    setBeforeIndex(0);
+    setAfterIndex(1);
   };
 
-  const handleAfterChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setAfterImage(URL.createObjectURL(file));
+  const beforeImage = images[beforeIndex];
+  const afterImage = images[afterIndex];
+
+  const changeIndex = (type, direction) => {
+    if (type === "before") {
+      setBeforeIndex((prev) =>
+        direction === "prev"
+          ? (prev - 1 + images.length) % images.length
+          : (prev + 1) % images.length
+      );
+    } else {
+      setAfterIndex((prev) =>
+        direction === "prev"
+          ? (prev - 1 + images.length) % images.length
+          : (prev + 1) % images.length
+      );
     }
   };
 
@@ -41,14 +47,8 @@ const ImageCompare = () => {
       <h2>Before / After Comparison</h2>
 
       <div className="input-section">
-        <div>
-          <label><strong>Before Image:</strong></label>
-          <input type="file" accept="image/*" onChange={handleBeforeChange} />
-        </div>
-        <div>
-          <label><strong>After Image:</strong></label>
-          <input type="file" accept="image/*" onChange={handleAfterChange} />
-        </div>
+        <label><strong>Select Images (Multiple):</strong></label>
+        <input type="file" accept="image/*" multiple onChange={handleImageChange} />
       </div>
 
       {beforeImage && afterImage ? (
@@ -66,15 +66,22 @@ const ImageCompare = () => {
               />
             </div>
             <div className="controls">
+              <button onClick={() => changeIndex("before", "prev")} title="Previous"><FaArrowLeft /></button>
+              <button onClick={() => changeIndex("before", "next")} title="Next"><FaArrowRight /></button>
               <button onClick={() => setBeforeZoom(beforeZoom + 0.1)} title="Zoom In"><FaPlus /></button>
               <button onClick={() => setBeforeZoom(Math.max(0.1, beforeZoom - 0.1))} title="Zoom Out"><FaMinus /></button>
               <button onClick={() => setBeforeFlipped(!beforeFlipped)} title="Flip Horizontally"><FaArrowsAltH /></button>
               <button onClick={() => setBeforeVFlipped(!beforeVFlipped)} title="Flip Vertically"><FaArrowsAltV /></button>
-              <button onClick={() => {
-                setBeforeZoom(1);
-                setBeforeFlipped(false);
-                setBeforeVFlipped(false);
-              }} title="Reset"><FaSyncAlt /></button>
+              <button
+                onClick={() => {
+                  setBeforeZoom(1);
+                  setBeforeFlipped(false);
+                  setBeforeVFlipped(false);
+                }}
+                title="Reset"
+              >
+                <FaSyncAlt />
+              </button>
             </div>
           </div>
 
@@ -91,20 +98,27 @@ const ImageCompare = () => {
               />
             </div>
             <div className="controls">
+              <button onClick={() => changeIndex("after", "prev")} title="Previous"><FaArrowLeft /></button>
+              <button onClick={() => changeIndex("after", "next")} title="Next"><FaArrowRight /></button>
               <button onClick={() => setAfterZoom(afterZoom + 0.1)} title="Zoom In"><FaPlus /></button>
               <button onClick={() => setAfterZoom(Math.max(0.1, afterZoom - 0.1))} title="Zoom Out"><FaMinus /></button>
               <button onClick={() => setAfterFlipped(!afterFlipped)} title="Flip Horizontally"><FaArrowsAltH /></button>
               <button onClick={() => setAfterVFlipped(!afterVFlipped)} title="Flip Vertically"><FaArrowsAltV /></button>
-              <button onClick={() => {
-                setAfterZoom(1);
-                setAfterFlipped(false);
-                setAfterVFlipped(false);
-              }} title="Reset"><FaSyncAlt /></button>
+              <button
+                onClick={() => {
+                  setAfterZoom(1);
+                  setAfterFlipped(false);
+                  setAfterVFlipped(false);
+                }}
+                title="Reset"
+              >
+                <FaSyncAlt />
+              </button>
             </div>
           </div>
         </div>
       ) : (
-        <p>Please upload both "Before" and "After" images to compare.</p>
+        <p>Please select at least two images for comparison.</p>
       )}
     </div>
   );
